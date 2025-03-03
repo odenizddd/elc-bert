@@ -39,7 +39,7 @@ def parse_arguments():
     # Required parameters
     parser.add_argument(
         "--input_path",
-        default="../data/processed/cached_{sequence_length}.txt",
+        default="./data/processed/cached_{sequence_length}.txt",
         type=str,
         help="The input data dir. Should be the cached text file.",
     )
