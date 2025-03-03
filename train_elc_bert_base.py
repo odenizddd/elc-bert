@@ -220,11 +220,11 @@ def setup_training(args):
 
     seed_everything(args.seed + rank)
 
-    torch.distributed.init_process_group(
-        backend="nccl", rank=rank, world_size=world_size
-    )
-    if rank == 0:
-        print(f"Group initialized? {torch.distributed.is_initialized()}", flush=True)
+    # torch.distributed.init_process_group(
+    #     backend="nccl", rank=rank, world_size=world_size
+    # )
+    # if rank == 0:
+    #     print(f"Group initialized? {torch.distributed.is_initialized()}", flush=True)
 
     local_rank = rank - gpus_per_node * (rank // gpus_per_node)
     torch.cuda.set_device(local_rank)
