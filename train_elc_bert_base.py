@@ -58,7 +58,7 @@ def parse_arguments():
     )
     parser.add_argument(
         "--vocab_path",
-        default="./tokenizer.json",
+        default="./tokenizers/tokenizer.json",
         type=str,
         help="The vocabulary the BERT model will train on.",
     )
