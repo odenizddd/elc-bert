@@ -102,7 +102,7 @@ class Dataset(Dataset):
         self.pad_index = self.tokenizer.token_to_id("[PAD]")
 
         self.segments = []
-        for i, segment in enumerate(open(file)):
+        for i, segment in enumerate(open(file, encoding="utf-8", errors="ignore")):
             if i % n_gpus != offset:
                 continue
 
