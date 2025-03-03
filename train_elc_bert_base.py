@@ -29,8 +29,8 @@ from pre_training.utils import (
 from pre_training.dataset import Dataset
 
 # Assuming being run on a SLURM system (remove "if" if not the case)
-if int(os.environ["SLURM_PROCID"]) == 0:
-    import wandb
+# if int(os.environ["SLURM_PROCID"]) == 0:
+#     import wandb
 
 
 def parse_arguments():
@@ -158,15 +158,15 @@ def parse_arguments():
         type=float,
         help="The label smoothing to apply to apply to cross-entropy.",
     )
-    parser.add_argument(
-        "--wandb_entity", type=str, default=None, help="Your WANDB username/entity."
-    )
-    parser.add_argument(
-        "--wandb_name", type=str, default="ELC BERT Base", help="WANDB run name."
-    )
-    parser.add_argument(
-        "--wandb_project", type=str, default="ELC BERT", help="WANDB project name."
-    )
+    # parser.add_argument(
+    #     "--wandb_entity", type=str, default=None, help="Your WANDB username/entity."
+    # )
+    # parser.add_argument(
+    #     "--wandb_name", type=str, default="ELC BERT Base", help="WANDB run name."
+    # )
+    # parser.add_argument(
+    #     "--wandb_project", type=str, default="ELC BERT", help="WANDB project name."
+    # )
     args = parser.parse_args()
 
     return args
@@ -208,9 +208,9 @@ def setup_training(args):
     assert torch.cuda.is_available()
     args.n_gpu = torch.cuda.device_count()
 
-    world_size = int(os.environ["WORLD_SIZE"])
-    rank = int(os.environ["SLURM_PROCID"])
-    gpus_per_node = int(os.environ["SLURM_GPUS_ON_NODE"])
+    world_size = int(os.environ.get("WORLD_SIZE", 1))
+    rank = int(os.environ.get("SLURM_PROCID", 0))
+    gpus_per_node = int(os.environ.get("SLURM_GPUS_ON_NODE", 1))
     assert gpus_per_node == torch.cuda.device_count()
     print(
         f"Hello from rank {rank} of {world_size} on {gethostname()} where \
@@ -252,17 +252,17 @@ def setup_training(args):
 
     args.device_max_steps = args.max_steps
 
-    if is_main_process():
-        wandb.init(
-            name=args.wandb_name,
-            config=args,
-            id=args.wandb_id,
-            project=args.wandb_project,
-            entity=args.wandb_entity,
-            resume="auto",
-            allow_val_change=True,
-            reinit=True,
-        )
+    # if is_main_process():
+    #     wandb.init(
+    #         name=args.wandb_name,
+    #         config=args,
+    #         id=args.wandb_id,
+    #         project=args.wandb_project,
+    #         entity=args.wandb_entity,
+    #         resume="auto",
+    #         allow_val_change=True,
+    #         reinit=True,
+    #     )
 
     return device, local_rank
 
@@ -273,8 +273,8 @@ def prepare_model_and_optimizer(args, device, local_rank, checkpoint):
 
     if is_main_process():
         n_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-        wandb.config.update(config.to_dict())
-        wandb.config.update({"n_params": n_params})
+        # wandb.config.update(config.to_dict())
+        # wandb.config.update({"n_params": n_params})
         print(model)
         print(f"NUMBER OF PARAMETERS: {n_params}\n", flush=True)
 
@@ -441,20 +441,20 @@ def training_epoch(
                                     lr: {optimizer.param_groups[0]['lr']:.5f}"
                 )
 
-                if global_step % 100 == 0:
-                    log_parameter_histograms(model, global_step)
+                # if global_step % 100 == 0:
+                #     log_parameter_histograms(model, global_step)
 
-                wandb.log(
-                    {
-                        "epoch": epoch,
-                        "train/loss": total_loss,
-                        "train/accuracy": avg_accuracy * 100.0,
-                        "stats/learning_rate": optimizer.param_groups[0]["lr"],
-                        "stats/grad_norm": grad_norm,
-                        "stats/seq_length": data.seq_length,
-                    },
-                    step=global_step,
-                )
+                # wandb.log(
+                #     {
+                #         "epoch": epoch,
+                #         "train/loss": total_loss,
+                #         "train/accuracy": avg_accuracy * 100.0,
+                #         "stats/learning_rate": optimizer.param_groups[0]["lr"],
+                #         "stats/grad_norm": grad_norm,
+                #         "stats/seq_length": data.seq_length,
+                #     },
+                #     step=global_step,
+                # )
 
                 total_loss = 0
                 avg_accuracy = 0
@@ -558,9 +558,9 @@ if __name__ == "__main__":
         args = argparse.Namespace(**args)
     else:
         checkpoint, initial_epoch, global_step = None, 0, 0
-        args.wandb_id = (
-            wandb.util.generate_id() if int(os.environ["SLURM_PROCID"]) == 0 else 0
-        )
+        # args.wandb_id = (
+        #     wandb.util.generate_id() if int(os.environ["SLURM_PROCID"]) == 0 else 0
+        # )
 
     tokenizer = Tokenizer.from_file(args.vocab_path)
     device, local_rank = setup_training(args)
