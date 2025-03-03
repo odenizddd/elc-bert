@@ -45,7 +45,7 @@ def parse_arguments():
     )
     parser.add_argument(
         "--config_file",
-        default="../configs/base.json",
+        default="./configs/base.json",
         type=str,
         help="The BERT model config",
     )
