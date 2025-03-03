@@ -520,7 +520,7 @@ def load_dataset(args, tokenizer, device):
     min_length = torch.tensor(
         len(train_data) // batch_size, dtype=torch.long, device=device
     )
-    torch.distributed.all_reduce(min_length, torch.distributed.ReduceOp.MIN)
+    # torch.distributed.all_reduce(min_length, torch.distributed.ReduceOp.MIN)
 
     return train_data, min_length
 
