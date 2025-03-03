@@ -342,14 +342,14 @@ def prepare_model_and_optimizer(args, device, local_rank, checkpoint):
         0.1,
     )
 
-    model = DistributedDataParallel(
-        model,
-        device_ids=[local_rank],
-        bucket_cap_mb=torch.cuda.get_device_properties(device).total_memory,
-        broadcast_buffers=False,
-        gradient_as_bucket_view=True,
-        static_graph=True,
-    )
+    # model = DistributedDataParallel(
+    #     model,
+    #     device_ids=[local_rank],
+    #     bucket_cap_mb=torch.cuda.get_device_properties(device).total_memory,
+    #     broadcast_buffers=False,
+    #     gradient_as_bucket_view=True,
+    #     static_graph=True,
+    # )
 
     grad_scaler = torch.cuda.amp.GradScaler(enabled=args.mixed_precision)
 
