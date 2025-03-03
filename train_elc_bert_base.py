@@ -92,7 +92,7 @@ def parse_arguments():
     )
     parser.add_argument(
         "--batch_size",
-        default=256,
+        default=4,
         type=int,
         help="Total batch size for training per GPUs and per \
             grad accumulation step.",
