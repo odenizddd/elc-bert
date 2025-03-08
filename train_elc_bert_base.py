@@ -209,7 +209,7 @@ def setup_training(args):
     args.n_gpu = torch.cuda.device_count()
 
     world_size = int(os.environ.get("WORLD_SIZE", 1))
-    rank = int(os.environ.get("SLURM_PROCID", 0))
+    rank = int(os.environ.get("RANK", 0))
     gpus_per_node = int(os.environ.get("SLURM_GPUS_ON_NODE", 1))
     assert gpus_per_node == torch.cuda.device_count()
     print(
