@@ -9,7 +9,7 @@ regex = re.compile(r"\[\d+\]")
 def preprocess(f):
     prev_line = None
     for line in f:
-        line = ' '.join(line.strip().split())
+        line = " ".join(line.strip().split())
         line = regex.sub("", line)
         line = clean(line, minimal=True)
 
@@ -57,7 +57,8 @@ def preprocess(f):
 
         prev_line = line
 
-with open("../data/babylm_data/babylm_100M/simple_wikipedia.train") as f:
-    with open("../data/processed/simple_wikipedia.txt", 'w') as g:
+
+with open("../data/babylm_data/babylm_10M/simple_wikipedia.train") as f:
+    with open("../data/processed/simple_wikipedia.txt", "w") as g:
         for line in preprocess(f):
             g.write(f"{line}\n")

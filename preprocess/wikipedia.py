@@ -11,7 +11,7 @@ regex_3 = re.compile(r"= = = ([^\=]*) = = =")
 def preprocess(f):
     prev_line = None
     for i, line in enumerate(f):
-        line = ' '.join(line.strip().split())
+        line = " ".join(line.strip().split())
         line = clean(line, minimal=True)
 
         if i > 0 and line.startswith("= = = "):
@@ -22,14 +22,15 @@ def preprocess(f):
 
         if line.startswith("[[Category:") or line.startswith("[[File:"):
             continue
-        
+
         line = regex_1.sub("", line)
         line = regex_2.sub(r"\1", line)
         line = regex_3.sub(r"\1", line)
 
         yield line
 
-with open("../data/babylm_data/babylm_100M/wikipedia.train") as f:
-    with open("../data/processed/wikipedia.txt", 'w') as g:
+
+with open("../data/babylm_data/babylm_10M/wikipedia.train") as f:
+    with open("../data/processed/wikipedia.txt", "w") as g:
         for line in preprocess(f):
             g.write(f"{line}\n")

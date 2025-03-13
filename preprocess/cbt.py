@@ -2,7 +2,6 @@ from smart_open import open
 from normalize import clean
 
 
-
 def preprocess(f):
     for line in f:
         line = line.strip()
@@ -28,7 +27,7 @@ def preprocess(f):
         yield line
 
 
-with open("../data/babylm_data/babylm_100M/cbt.train") as f:
-    with open("../data/processed/cbt.txt", 'w') as g:
+with open("../data/babylm_data/babylm_10M/cbt.train") as f:
+    with open("../data/processed/cbt.txt", "w") as g:
         for line in preprocess(f):
             g.write(f"{line}\n")

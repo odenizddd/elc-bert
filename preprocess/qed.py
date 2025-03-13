@@ -6,7 +6,7 @@ import html
 def preprocess(f):
     prev_line = None
     for line in f:
-        line = ' '.join(line.strip().split())
+        line = " ".join(line.strip().split())
 
         if line.startswith("- "):
             line = line[2:]
@@ -51,7 +51,14 @@ def preprocess(f):
         if line.endswith(":") and not any(c.isalpha() for c in line):
             continue
 
-        if not line.endswith(":") and not line.startswith('"') and not line.endswith('"') and not (line.startswith("(") and line.endswith(")")) and not (line.startswith("[") and line.endswith("]")) and not (line.startswith("{") and line.endswith("}")):
+        if (
+            not line.endswith(":")
+            and not line.startswith('"')
+            and not line.endswith('"')
+            and not (line.startswith("(") and line.endswith(")"))
+            and not (line.startswith("[") and line.endswith("]"))
+            and not (line.startswith("{") and line.endswith("}"))
+        ):
             line = f'"{line}"'
 
         if prev_line is not None and prev_line == line:
@@ -61,7 +68,7 @@ def preprocess(f):
         prev_line = line
 
 
-with open("../data/babylm_data/babylm_100M/qed.train") as f:
-    with open("../data/processed/qed.txt", 'w') as g:
+with open("../data/babylm_data/babylm_10M/qed.train") as f:
+    with open("../data/processed/qed.txt", "w") as g:
         for line in preprocess(f):
             g.write(f"{line}\n")
