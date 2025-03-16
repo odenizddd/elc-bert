@@ -406,16 +406,16 @@ def training_epoch(
             prediction = model(input_ids, attention_mask, target_ids)
 
             # decode input ids
-            print(input_ids.shape)
-            print(input_ids)
-            print(tokenizer.decode_batch(input_ids.tolist(), skip_special_tokens=False))
+            print(input_ids.T.shape)
+            print(input_ids.T)
+            print(
+                tokenizer.decode_batch(input_ids.T.tolist(), skip_special_tokens=False)
+            )
 
             # decode target ids
             print(target_ids.shape)
             print(target_ids)
-            print(
-                tokenizer.decode_batch(target_ids.tolist(), skip_special_tokens=False)
-            )
+            print(tokenizer.decode_batch(target_ids.tolist()))
 
             print(prediction.shape)
             print(prediction)
