@@ -419,8 +419,10 @@ def training_epoch(
             print(target_ids.T.shape)
             # print(target_ids.T)
             target_ids = torch.where(target_ids == -100, torch.tensor(0), target_ids)
-            decoded_targets = tokenizer.decode_batch(target_ids.T.tolist())
-            for i, decoded_target in enumerate(decoded_targets):
+            token_strings = [
+                tokenizer.model.id_to_token(id) for id in target_ids.T.tolist()
+            ]
+            for i, decoded_target in enumerate(token_strings):
                 print("Decoded target: ", i)
                 print(decoded_target)
 
@@ -429,8 +431,10 @@ def training_epoch(
             prediction = prediction.argmax(-1)
             print(prediction.shape)
             # print(prediction)
-            decoded = tokenizer.decode(prediction.tolist())
-            print(decoded)
+            token_strings = [
+                tokenizer.model.id_to_token(id) for id in prediction.tolist()
+            ]
+            print(token_strings)
 
             return args.device_max_steps
 
