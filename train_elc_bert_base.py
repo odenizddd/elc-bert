@@ -413,9 +413,10 @@ def training_epoch(
             )
 
             # decode target ids
-            print(target_ids.shape)
-            print(target_ids)
-            print(tokenizer.decode_batch(target_ids.tolist()))
+            print(target_ids.T.shape)
+            print(target_ids.T)
+            target_ids = torch.where(target_ids == -100, torch.tensor(1), target_ids)
+            print(tokenizer.decode_batch(target_ids.T.tolist()))
 
             print(prediction.shape)
             print(prediction)
