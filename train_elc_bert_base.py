@@ -405,6 +405,12 @@ def training_epoch(
             model.train()
             prediction = model(input_ids, attention_mask, target_ids)
 
+            print(prediction.shape)
+            print(prediction)
+            print(prediction[0])
+
+            return args.device_max_steps
+
             target_ids = target_ids.flatten()
             target_ids = target_ids[target_ids != -100]
             loss = F.cross_entropy(
@@ -520,7 +526,7 @@ def load_dataset(args, tokenizer, device):
     min_length = torch.tensor(
         len(train_data) // batch_size, dtype=torch.long, device=device
     )
-    # torch.distributed.all_reduce(min_length, torch.distributed.ReduceOp.MIN)
+    # torch.distributed.all_reduce(min_length, torch.distributed.ReduceOp.MIN)
 
     return train_data, min_length
 
