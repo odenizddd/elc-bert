@@ -407,7 +407,9 @@ def training_epoch(
 
             print(prediction.shape)
             print(prediction)
-            print(prediction[0])
+            prediction = prediction.argmax(-1)
+            print(prediction.shape)
+            print(prediction)
 
             return args.device_max_steps
 
