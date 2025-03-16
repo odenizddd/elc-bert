@@ -418,9 +418,9 @@ def training_epoch(
             # decode target ids
             print(target_ids.T.shape)
             # print(target_ids.T)
-            target_ids = torch.where(target_ids == -100, torch.tensor(0), target_ids)
+            # target_ids = torch.where(target_ids == -100, torch.tensor(0), target_ids)
             token_strings = [
-                [tokenizer.model.id_to_token(id) for id in x]
+                [tokenizer.model.id_to_token(id) for id in x if id != -100]
                 for x in target_ids.T.tolist()
             ]
             for i, decoded_target in enumerate(token_strings):
