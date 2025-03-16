@@ -407,24 +407,30 @@ def training_epoch(
 
             # decode input ids
             print(input_ids.T.shape)
-            print(input_ids.T)
-            print(
-                tokenizer.decode_batch(input_ids.T.tolist(), skip_special_tokens=False)
+            # print(input_ids.T)
+            decoded_inputs = tokenizer.decode_batch(
+                input_ids.T.tolist(), skip_special_tokens=False
             )
+            for i, decoded_input in enumerate(decoded_inputs):
+                print("Decoded input: ", i)
+                print(decoded_input)
 
             # decode target ids
             print(target_ids.T.shape)
-            print(target_ids.T)
-            target_ids = torch.where(target_ids == -100, torch.tensor(1), target_ids)
-            print("\n".join(tokenizer.decode_batch(target_ids.T.tolist())))
+            # print(target_ids.T)
+            target_ids = torch.where(target_ids == -100, torch.tensor(0), target_ids)
+            decoded_targets = tokenizer.decode_batch(target_ids.T.tolist())
+            for i, decoded_target in enumerate(decoded_targets):
+                print("Decoded target: ", i)
+                print("".join([f"{j} - {t}," for j, t in enumerate(decoded_target)]))
 
             print(prediction.shape)
-            print(prediction)
+            # print(prediction)
             prediction = prediction.argmax(-1)
             print(prediction.shape)
-            print(prediction)
+            # print(prediction)
             decoded = tokenizer.decode(prediction.tolist())
-            print(decoded)
+            print("".join([f"{j} - {t}," for j, t in enumerate(decoded)]))
 
             return args.device_max_steps
 
