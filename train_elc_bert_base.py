@@ -410,7 +410,7 @@ def training_epoch(
             prediction = prediction.argmax(-1)
             print(prediction.shape)
             print(prediction)
-            decoded = tokenizer.decode(prediction)
+            decoded = tokenizer.decode(prediction.tolist())
             print(decoded)
 
             return args.device_max_steps
