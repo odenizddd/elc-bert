@@ -422,7 +422,7 @@ def training_epoch(
             decoded_targets = tokenizer.decode_batch(target_ids.T.tolist())
             for i, decoded_target in enumerate(decoded_targets):
                 print("Decoded target: ", i)
-                print("".join([f"{j} - {t}," for j, t in enumerate(decoded_target)]))
+                print(decoded_target)
 
             print(prediction.shape)
             # print(prediction)
@@ -430,7 +430,7 @@ def training_epoch(
             print(prediction.shape)
             # print(prediction)
             decoded = tokenizer.decode(prediction.tolist())
-            print("".join([f"{j} - {t}," for j, t in enumerate(decoded)]))
+            print(decoded)
 
             return args.device_max_steps
 
