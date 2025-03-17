@@ -583,7 +583,9 @@ if __name__ == "__main__":
     args.activation_checkpointing = False
 
     if args.checkpoint_path is not None:
-        checkpoint = torch.load(args.checkpoint_path, map_location="cpu")
+        checkpoint = torch.load(
+            args.checkpoint_path, map_location="cpu", weights_only=False
+        )
         checkpoint_args = checkpoint["args"]
         initial_epoch = checkpoint["epoch"] + 1
         global_step = checkpoint["global_step"]
