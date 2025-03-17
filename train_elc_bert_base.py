@@ -591,6 +591,8 @@ if __name__ == "__main__":
         global_step = checkpoint["global_step"]
         args = vars(args).copy()
         args.update(vars(checkpoint_args))
+        global_step = 0
+        initial_epoch = 0
         args = argparse.Namespace(**args)
     else:
         checkpoint, initial_epoch, global_step = None, 0, 0
