@@ -529,7 +529,7 @@ def save(model, optimizer, grad_scaler, scheduler, global_step, epoch, args):
     return checkpoint_path
 
 
-def load_dataset(args, tokenizer, device):
+def load_dataset(args, tokenizer, device, global_step):
     seq_length = (
         args.seq_length * 4
         if global_step >= int(args.device_max_steps * args.long_after)
@@ -575,3 +575,58 @@ def create_train_dataloader(data, args, global_step, seed):
         pin_memory=True,
     )
     return train_dataloader
+
+
+if __name__ == "__main__":
+    args = parse_arguments()
+    args.mixed_precision = True
+    args.activation_checkpointing = False
+
+    if args.checkpoint_path is not None:
+        checkpoint = torch.load(
+            args.checkpoint_path, map_location="cpu", weights_only=False
+        )
+        checkpoint_args = checkpoint["args"]
+        initial_epoch = checkpoint["epoch"] + 1
+        global_step = checkpoint["global_step"]
+        args = vars(args).copy()
+        args.update(vars(checkpoint_args))
+        global_step = 0
+        initial_epoch = 0
+        args = argparse.Namespace(**args)
+    else:
+        checkpoint, initial_epoch, global_step = None, 0, 0
+        # args.wandb_id = (
+        #     wandb.util.generate_id() if int(os.environ["SLURM_PROCID"]) == 0 else 0
+        # )
+
+    tokenizer = Tokenizer.from_file(args.vocab_path)
+    device, local_rank = setup_training(args)
+    model, config, optimizer, scheduler, grad_scaler = prepare_model_and_optimizer(
+        args, device, local_rank, checkpoint
+    )
+    train_data, min_length = load_dataset(args, tokenizer, device, global_step)
+
+    for epoch in count(initial_epoch):
+        if global_step == int(args.device_max_steps * args.long_after):
+            train_data, min_length = load_dataset(args, tokenizer, device, global_step)
+
+        global_step = training_epoch(
+            model,
+            tokenizer,
+            train_data,
+            optimizer,
+            scheduler,
+            grad_scaler,
+            global_step,
+            epoch,
+            args,
+            device,
+            min_length,
+        )
+        checkpoint_path = save(
+            model, optimizer, grad_scaler, scheduler, global_step, epoch, args
+        )
+
+        if global_step >= args.device_max_steps:
+            break
