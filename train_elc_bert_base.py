@@ -340,8 +340,8 @@ def init_model():
         "large": "ELC_BERT_baby_100M",
     }
 
-    small_model_path = "../models/{}".format(model_variants["small"])
-    large_model_path = "../models/{}".format(model_variants["large"])
+    small_model_path = "lgcharpe/{}".format(model_variants["small"])
+    large_model_path = "lgcharpe/{}".format(model_variants["large"])
 
     small_model = AutoModelForMaskedLM.from_pretrained(
         small_model_path, trust_remote_code=True
