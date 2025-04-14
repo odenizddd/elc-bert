@@ -167,6 +167,12 @@ def parse_arguments():
     parser.add_argument(
         "--wandb_project", type=str, default="ELC BERT", help="WANDB project name."
     )
+    parser.add_argument(
+        "--init_from_small_model",
+        default=False,
+        type=bool,
+        help="Whether to initialize the model from a smaller model.",
+    )
     args = parser.parse_args()
 
     return args
@@ -267,9 +273,96 @@ def setup_training(args):
     return device, local_rank
 
 
+from transformers import AutoModelForMaskedLM
+import torch
+import copy
+
+
+def copy_parameters(small_model, large_model):
+    small_state = small_model.state_dict()
+    large_state = large_model.state_dict()
+
+    matched_params = 0
+    partial_copies = 0
+
+    for name in large_state:
+        if name in small_state:
+            small_param = small_state[name]
+            large_param = large_state[name]
+
+            if small_param.shape == large_param.shape:
+                large_state[name] = small_param
+                matched_params += 1
+            else:
+                # Try partial copy (e.g., matching leading dimensions)
+                try:
+                    slices = tuple(
+                        slice(0, min(s, l))
+                        for s, l in zip(small_param.shape, large_param.shape)
+                    )
+                    large_param[slices] = small_param[slices]
+                    large_state[name] = large_param
+                    partial_copies += 1
+                except Exception as e:
+                    print(f"Failed to copy {name}: {e}")
+        else:
+            print(f"{name} not found in small model")
+
+    large_model.load_state_dict(large_state)
+    print(f"{matched_params} parameters fully copied.")
+    print(f"{partial_copies} parameters partially copied.")
+
+    large_model.load_state_dict(large_state)
+    print(f"{matched_params} parameters fully copied.")
+    print(f"{partial_copies} parameters partially copied.")
+
+
+def compare_parameters(original_model, modified_model):
+    original_state = original_model.state_dict()
+    modified_state = modified_model.state_dict()
+
+    same = True
+
+    for name in original_state:
+        if name in modified_state:
+            original_param = original_state[name]
+            modified_param = modified_state[name]
+
+            if not torch.equal(original_param, modified_param):
+                same = False
+
+    print(f"Parameters are {'the same' if same else 'different'} after copying.")
+
+
+def init_model():
+    model_variants = {
+        "small": "ELC_BERT_small_baby_10M",
+        "large": "ELC_BERT_baby_100M",
+    }
+
+    small_model_path = "../models/{}".format(model_variants["small"])
+    large_model_path = "../models/{}".format(model_variants["large"])
+
+    small_model = AutoModelForMaskedLM.from_pretrained(
+        small_model_path, trust_remote_code=True
+    )
+    large_model = AutoModelForMaskedLM.from_pretrained(
+        large_model_path, trust_remote_code=True
+    )
+
+    original_large_model = copy.deepcopy(large_model)
+
+    copy_parameters(small_model, large_model)
+    compare_parameters(original_large_model, large_model)
+
+    return large_model
+
+
 def prepare_model_and_optimizer(args, device, local_rank, checkpoint):
     config = BertConfig(args.config_file)
     model = Bert(config, args.activation_checkpointing)
+    if args.init_from_small_model:
+        model = init_model()
 
     if is_main_process():
         n_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
