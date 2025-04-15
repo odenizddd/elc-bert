@@ -361,6 +361,7 @@ def init_model():
 def prepare_model_and_optimizer(args, device, local_rank, checkpoint):
     config = BertConfig(args.config_file)
     model = Bert(config, args.activation_checkpointing)
+    print(f"{args=}")
     if args.init_from_small_model == "yes":
         model = init_model()
 
