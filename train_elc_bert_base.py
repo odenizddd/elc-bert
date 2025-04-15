@@ -167,12 +167,6 @@ def parse_arguments():
     parser.add_argument(
         "--wandb_project", type=str, default="ELC BERT", help="WANDB project name."
     )
-    parser.add_argument(
-        "--init_from_small_model",
-        type=str,
-        default="no",
-        help="Whether to initialize the model from a smaller model.",
-    )
     args = parser.parse_args()
 
     return args
@@ -360,10 +354,8 @@ def init_model():
 
 def prepare_model_and_optimizer(args, device, local_rank, checkpoint):
     config = BertConfig(args.config_file)
-    model = Bert(config, args.activation_checkpointing)
-    print(f"{args=}")
-    if args.init_from_small_model == "yes":
-        model = init_model()
+    # model = Bert(config, args.activation_checkpointing)
+    model = init_model()
 
     if is_main_process():
         n_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
