@@ -169,7 +169,6 @@ def parse_arguments():
     )
     parser.add_argument(
         "--init_from_small_model",
-        default=False,
         action="store_true",
         help="Whether to initialize the model from a smaller model.",
     )
