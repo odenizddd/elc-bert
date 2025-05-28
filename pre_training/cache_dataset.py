@@ -3,6 +3,8 @@ from smart_open import open
 from tqdm import tqdm
 
 import argparse
+from transformers import ByT5Tokenizer
+
 
 parser = argparse.ArgumentParser(description="Cached Dataset Creation")
 parser.add_argument(
@@ -27,7 +29,7 @@ args = parser.parse_args()
 
 
 SEQ_LEN = args.sequence_length - 2
-tokenizer = Tokenizer.from_file(args.tokenizer_path)
+tokenizer = ByT5Tokenizer.from_pretrained("google/byt5-small")
 
 
 documents = [[]]
@@ -39,7 +41,9 @@ for line in tqdm(open(args.segments_path)):
             documents.append([])
         continue
 
-    ids = tokenizer.encode(line, add_special_tokens=False).ids
+    #ids = tokenizer.encode(line, add_special_tokens=False).ids
+    ids = tokenizer.encode(line, add_special_tokens=False)
+
     documents[-1].append(ids)
 
 
@@ -51,12 +55,20 @@ with open(f"../data/processed/cached_{SEQ_LEN + 2}.txt", "w") as f:
 
             if len(segment) > SEQ_LEN:
                 segment = segment[:SEQ_LEN]
-                subwords = [tokenizer.id_to_token(token_id) for token_id in segment]
-                f.write(" ".join(subwords) + "\n")
+                #subwords = [tokenizer.id_to_token(token_id) for token_id in segment]
+                # subwords = tokenizer.convert_ids_to_tokens(segment)
+
+                # f.write(" ".join(subwords) + "\n")
+                f.write(" ".join(str(token_id) for token_id in segment) + "\n")
+
 
                 segment = [s for s in sentence]
 
         if len(segment) > 0:
             segment = segment[:SEQ_LEN]
-            subwords = [tokenizer.id_to_token(token_id) for token_id in segment]
-            f.write(" ".join(subwords) + "\n")
+            #subwords = [tokenizer.id_to_token(token_id) for token_id in segment]
+            # subwords = tokenizer.convert_ids_to_tokens(segment)
+
+            # f.write(" ".join(subwords) + "\n")
+            f.write(" ".join(str(token_id) for token_id in segment) + "\n")
+

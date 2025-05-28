@@ -18,6 +18,7 @@ from pre_training.lamb import Lamb
 from pre_training.config import BertConfig
 
 from models.model_elc_bert_base import Bert
+from transformers import ByT5Tokenizer
 
 from pre_training.utils import (
     cosine_schedule_with_warmup,
@@ -92,7 +93,7 @@ def parse_arguments():
     )
     parser.add_argument(
         "--batch_size",
-        default=4,
+        default=1,
         type=int,
         help="Total batch size for training per GPUs and per \
             grad accumulation step.",
@@ -535,7 +536,7 @@ def create_train_dataloader(data, args, global_step, seed):
         data,
         shuffle=True,
         batch_size=batch_size,
-        num_workers=7 - 1,
+        num_workers=0,#7 - 1,
         generator=torch.Generator().manual_seed(seed),
         drop_last=True,
         pin_memory=True,
@@ -562,7 +563,8 @@ if __name__ == "__main__":
         #     wandb.util.generate_id() if int(os.environ["SLURM_PROCID"]) == 0 else 0
         # )
 
-    tokenizer = Tokenizer.from_file(args.vocab_path)
+    # tokenizer = Tokenizer.from_file(args.vocab_path)
+    tokenizer = ByT5Tokenizer.from_pretrained("google/byt5-small")
     device, local_rank = setup_training(args)
     model, config, optimizer, scheduler, grad_scaler = prepare_model_and_optimizer(
         args, device, local_rank, checkpoint
