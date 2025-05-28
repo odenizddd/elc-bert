@@ -19,7 +19,7 @@ class SpanMaskingStrategy:
         self.tokenizer = tokenizer
         self.n_special_tokens = n_special_tokens
         self.padding_label_id = padding_label_id
-        self.mask_index = self.tokenizer.token_to_id("[MASK]")
+        self.mask_index = self.tokenizer.convert_tokens_to_ids("<extra_id_0>")#self.tokenizer.token_to_id("[MASK]")
 
     def __call__(self, tokens):
         labels = torch.full_like(tokens, fill_value=self.padding_label_id)
@@ -54,7 +54,8 @@ class SpanMaskingStrategy:
             elif random_p < 1.0 - self.keep_p:
                 random_words = torch.randint(
                     low=self.n_special_tokens - 1,
-                    high=self.tokenizer.get_vocab_size(),
+                    high=self.tokenizer.vocab_size,
+                    #high=self.tokenizer.get_vocab_size(),
                     size=(sub_mask.sum(),),
                     dtype=torch.long
                 )
@@ -96,19 +97,24 @@ class Dataset(Dataset):
             keep_p=keep_p
         )
 
-        self.mask_index = self.tokenizer.token_to_id("[MASK]")
-        self.cls_index = self.tokenizer.token_to_id("[CLS]")
-        self.sep_index = self.tokenizer.token_to_id("[SEP]")
-        self.pad_index = self.tokenizer.token_to_id("[PAD]")
+        self.mask_index = self.tokenizer.convert_tokens_to_ids("<extra_id_0>")
+        self.cls_index = self.tokenizer.convert_tokens_to_ids("<extra_id_1>")
+        self.sep_index = self.tokenizer.convert_tokens_to_ids("<extra_id_2>")
+        self.pad_index = self.tokenizer.convert_tokens_to_ids("<extra_id_3>")
 
         self.segments = []
         for i, segment in enumerate(open(file, encoding="utf-8", errors="ignore")):
             if i % n_gpus != offset:
                 continue
 
-            segment = segment.strip().split(" ")
-            assert len(segment) <= seq_length - 2, " ".join(segment)
-            segment = [self.tokenizer.token_to_id(token) for token in segment]
+            # segment = segment.strip().split(" ")
+            # assert len(segment) <= seq_length - 2, " ".join(segment)
+            # segment = [self.tokenizer.token_to_id(token) for token in segment]
+            # self.segments.append(segment)
+
+            segment = [int(token_id) for token_id in segment.strip().split()]
+            if len(segment) > seq_length - 2:
+                segment = segment[:seq_length - 2]  # Truncate to avoid overflow
             self.segments.append(segment)
 
     def __len__(self):

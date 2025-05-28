@@ -19,6 +19,8 @@ from pre_training.config import BertConfig
 
 from models.model_elc_bert_base import Bert
 
+from transformers import ByT5Tokenizer
+
 from pre_training.utils import (
     cosine_schedule_with_warmup,
     is_main_process,
@@ -652,7 +654,8 @@ if __name__ == "__main__":
             wandb.util.generate_id() if int(os.environ["SLURM_PROCID"]) == 0 else 0
         )
 
-    tokenizer = Tokenizer.from_file(args.vocab_path)
+    # tokenizer = Tokenizer.from_file(args.vocab_path)
+    tokenizer = ByT5Tokenizer.from_pretrained("google/byt5-small")
     device, local_rank = setup_training(args)
     model, config, optimizer, scheduler, grad_scaler = prepare_model_and_optimizer(
         args, device, local_rank, checkpoint
